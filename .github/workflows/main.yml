@@ -1,0 +1,150 @@
+name: Build and Release Desktop App
+
+on:
+  push:
+    tags:
+      - 'v*.*.*' # This workflow runs when you push a new Git tag like v1.0.0, v1.0.1, etc.
+
+jobs:
+  build-windows:
+    runs-on: windows-latest # Use a Windows virtual machine
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4 # Action to check out your repository code
+
+    - name: Set up Python
+      uses: actions/setup-python@v5 # Action to set up Python environment
+      with:
+        python-version: '3.12' # Specify the Python version your app uses
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt # Install dependencies from your requirements.txt
+
+    - name: Build Windows Executable
+      run: |
+        # Replace 'app.py' with your main application script name
+        # --noconsole prevents a console window from opening
+        # --onefile packages everything into a single .exe file
+        # --windowed is a PyInstaller option specific to GUI apps on Windows
+        pyinstaller --noconsole --onefile --windowed main.py
+
+    - name: Upload Windows Artifact
+      uses: actions/upload-artifact@v4 # Action to upload build output as an artifact
+      with:
+        name: GMaps-Scraper-Windows # Name for the artifact (will be a ZIP file)
+        path: dist/main.exe # Path to the generated executable (adjust 'app.exe' if your app name is different after build)
+
+  build-linux:
+    runs-on: ubuntu-latest # Use a Linux (Ubuntu) virtual machine
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install system dependencies (for PySide6 on Linux)
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libxcb-cursor0 # Essential for PySide6 on many Linux systems
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Build Linux Executable
+      run: |
+        # Replace 'app.py'
+        pyinstaller --noconsole --onefile main.py
+
+    - name: Upload Linux Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: GMaps-Scraper-Linux
+        # PyInstaller --onefile on Linux creates an executable without an extension
+        # it might also create a directory with the same name if not --onefile
+        path: dist/main # Adjust 'app' if your app name is different after build
+
+  build-macos:
+    runs-on: macos-latest # This runner is Apple Silicon (arm64) by default
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        # If you specifically need an Intel macOS build, you might try:
+        # architecture: 'x64' # This *might* install x86_64 Python.
+        # And then run pyinstaller with 'arch -x86_64 python -m PyInstaller ...'
+        # However, `macos-latest` is ARM-based, so a native ARM build is standard.
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Build macOS Application (Apple Silicon)
+      run: |
+        # PyInstaller creates a .app bundle within the dist directory
+        pyinstaller --noconsole --onefile --windowed main.py
+
+    - name: Upload macOS Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: GMaps-Scraper-MacOS-Silicon
+        path: dist/*.app # Catches the .app bundle (e.g., dist/app.app)
+
+  create-release:
+    # This job depends on all build jobs completing successfully
+    needs: [build-windows, build-linux, build-macos]
+    runs-on: ubuntu-latest # A small Linux runner for the release step
+    permissions:
+      contents: write # Grant permission to write to GitHub Releases
+    if: success() # Only create the release if all previous build jobs succeeded
+
+    steps:
+    - name: Download all build artifacts
+      uses: actions/download-artifact@v4 # Action to download the artifacts from previous jobs
+      with:
+        path: artifacts # All downloaded artifacts will be placed in this directory
+
+    - name: List downloaded artifacts (for debugging, optional)
+      run: ls -R artifacts
+
+    - name: Create GitHub Release
+      id: create_release # Assign an ID to this step to reference its outputs
+      uses: softprops/action-gh-release@v2 # A popular action for creating GitHub Releases
+      with:
+        # Files to upload to the release. Paths are relative to the working directory.
+        # Ensure these paths match where actions/download-artifact put them.
+        files: |
+          artifacts/GMaps-Scraper-Windows/main.exe
+          artifacts/GMaps-Scraper-Linux/app
+          artifacts/GMaps-Scraper-MacOS-Silicon/main.app # This will typically be 'app.app' within the folder
+
+        name: Release ${{ github.ref_name }} # Release name (e.g., "Release v1.0.0")
+        tag_name: ${{ github.ref_name }} # The Git tag that triggered the workflow (e.g., "v1.0.0")
+        body: | # Release notes in Markdown
+          # Release ${{ github.ref_name }}
+
+          This release provides binaries for:
+          - **Windows** (.exe)
+          - **Linux** (Executable)
+          - **macOS** (Apple Silicon .app)
+
+          ## How to Install/Run:
+          * **Windows**: Download `your-app-windows.zip`, extract, and run `main.exe`.
+          * **Linux**: Download `your-app-linux.zip`, extract, and run the `main` executable. You might need to make it executable: `chmod +x app`.
+          * **macOS (Apple Silicon)**: Download `your-app-macos-arm64.zip`, extract, and drag `main.app` to your Applications folder.
+
+          ## Changes in this release:
+          (Add your specific release notes here. E.g., "Fixed bug X", "Added feature Y")
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Automatically provided by GitHub Actions for authentication
