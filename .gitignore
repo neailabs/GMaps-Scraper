@@ -1,0 +1,93 @@
+# Python
+# Compiled Python files
+__pycache__/
+*.pyc
+*.pyd
+*.pyo
+*.egg-info/
+.Python
+build/
+dist/
+*.egg
+*.env
+venv/
+env/
+
+# PySide6 / Qt related
+# Qt Designer UI compiled Python files
+*.ui.py
+# PySide6 deployment related files (e.g., from pyside6-deploy, PyInstaller)
+# These directories are often created during the packaging process
+# and contain the bundled application, temporary build files, etc.
+PyInstaller/
+*.spec
+# Common output directory names for bundled apps (macOS .app bundles)
+# If you build directly into your project root, you might want to be more specific,
+# e.g., MyApplication.app/ if your app is named "MyApplication"
+*.app/
+
+# Environment variables
+.env
+.flaskenv
+
+# Editor/IDE specific files
+.vscode/        # VS Code
+.idea/          # PyCharm/IntelliJ
+*.sublime-project # Sublime Text
+*.sublime-workspace
+.DS_Store       # macOS specific desktop services store files
+.localized      # macOS specific localization files
+
+# macOS specific files
+.DS_Store
+.Trashes
+._*
+.Spotlight-V100
+.TemporaryItems
+.fseventsd
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.pytest_cache/
+pytestdebug.log
+
+# Logs and databases
+*.log
+*.sqlite3
+*.db
+
+# Thumbnails
+.thumbnails/
+
+# Jupyter Notebook files (if you use them for prototyping)
+.ipynb_checkpoints
+
+# Virtual environment files (usually placed at the root, but can be elsewhere)
+# Explicitly ignore common virtual environment directory names
+/venv/
+/env/
+# If your virtual environment is named something else, add it here, e.g.:
+#/my_app_env/
+
+# Distribution / Packaging
+# Wheels
+*.whl
+sdist/
+
+# Documentation build outputs
+docs/_build/
+
+# Notes and other temporary files
+notes/
+*~
+*.bak
+*.swp
+*.swo
+*.tmp
