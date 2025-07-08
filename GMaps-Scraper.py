@@ -31,10 +31,6 @@ def main():
     if os.path.exists(AppConfig.ICON_PATH):
         app.setWindowIcon(QIcon(AppConfig.ICON_PATH))
     
-    # Enable high DPI scaling
-    app.setAttribute(Qt.ApplicationAttribute.AA_EnableHighDpiScaling, True)
-    app.setAttribute(Qt.ApplicationAttribute.AA_UseHighDpiPixmaps, True)
-    
     # Create and show main window
     window = GmapsCrawler()
     window.show()
