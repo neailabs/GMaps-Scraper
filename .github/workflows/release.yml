@@ -125,9 +125,9 @@ jobs:
         # Files to upload to the release. Paths are relative to the working directory.
         # Ensure these paths match where actions/download-artifact put them.
         files: |
-          artifacts/GMaps-Scraper-Windows.zip
-          artifacts/GMaps-Scraper-Linux.zip
-          artifacts/GMaps-Scraper-MacOS-Silicon.zip
+          artifacts/GMaps-Scraper-Windows
+          artifacts/GMaps-Scraper-Linux
+          artifacts/GMaps-Scraper-MacOS-Silicon
 
         name: Release ${{ github.ref_name }} # Release name (e.g., "Release v1.0.0")
         tag_name: ${{ github.ref_name }} # The Git tag that triggered the workflow (e.g., "v1.0.0")
