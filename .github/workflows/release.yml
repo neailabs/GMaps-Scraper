@@ -7,15 +7,15 @@ on:
 
 jobs:
   build-windows:
-    runs-on: windows-latest # Use a Windows virtual machine
+    runs-on: windows-latest
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4 # Action to check out your repository code
+      uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v5 # Action to set up Python environment
+      uses: actions/setup-python@v5
       with:
-        python-version: '3.12' # Specify the Python version your app uses
+        python-version: '3.12'
 
     - name: Install dependencies
       run: |
@@ -31,13 +31,13 @@ jobs:
         pyinstaller --noconsole --onefile --windowed GMaps-Scraper.py
 
     - name: Upload Windows Artifact
-      uses: actions/upload-artifact@v4 # Action to upload build output as an artifact
+      uses: actions/upload-artifact@v4
       with:
-        name: GMaps-Scraper-Windows.zip # Name for the artifact (will be a ZIP file)
-        path: dist/GMaps-Scraper.exe # Path to the generated executable (adjust 'app.exe' if your app name is different after build)
+        name: GMaps-Scraper-Windows
+        path: dist/GMaps-Scraper.exe
 
   build-linux:
-    runs-on: ubuntu-latest # Use a Linux (Ubuntu) virtual machine
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -65,10 +65,10 @@ jobs:
     - name: Upload Linux Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: GMaps-Scraper-Linux.zip
+        name: GMaps-Scraper-Linux
         # PyInstaller --onefile on Linux creates an executable without an extension
         # it might also create a directory with the same name if not --onefile
-        path: dist/GMaps-Scraper # Adjust 'app' if your app name is different after build
+        path: dist/GMaps-Scraper
 
   build-macos:
     runs-on: macos-latest # This runner is Apple Silicon (arm64) by default
@@ -98,7 +98,7 @@ jobs:
     - name: Upload macOS Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: GMaps-Scraper-MacOS-Silicon.zip
+        name: GMaps-Scraper-MacOS-Silicon
         path: dist/*.app # Catches the .app bundle (e.g., dist/app.app)
 
   create-release:
@@ -125,9 +125,9 @@ jobs:
         # Files to upload to the release. Paths are relative to the working directory.
         # Ensure these paths match where actions/download-artifact put them.
         files: |
-          artifacts/GMaps-Scraper-Windows/GMaps-Scraper.exe
-          artifacts/GMaps-Scraper-Linux/GMaps-Scraper
-          artifacts/GMaps-Scraper-MacOS-Silicon/GMaps-Scraper.app
+          artifacts/GMaps-Scraper-Windows.zip
+          artifacts/GMaps-Scraper-Linux.zip
+          artifacts/GMaps-Scraper-MacOS-Silicon.zip
 
         name: Release ${{ github.ref_name }} # Release name (e.g., "Release v1.0.0")
         tag_name: ${{ github.ref_name }} # The Git tag that triggered the workflow (e.g., "v1.0.0")
