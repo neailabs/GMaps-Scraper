@@ -36,30 +36,25 @@ A desktop GUI application built with PySide6 that fetches business listings from
 5. (Optional, but RECOMMENDED) Restrict the API key to the Places API for security
 
 ## Usage
-
-1. Install the dependencies":
-   ```bash
-      pip install -r requirements.txt
-   ```
-      
-2. Run the application:
+     
+1. Run the application:
    ```bash
    python GMaps-Scraper.py
    ```
 
-3. Enter your Google Maps API key in the API Key field
+2. Enter your Google Maps API key in the API Key field
 
-4. Enter a search query (e.g., "restaurants in New York", "hotels in Paris")
+3. Enter a search query (e.g., "restaurants in New York", "hotels in Paris")
 
-5. Set the number of listings you want to fetch (1-100)
+4. Set the number of listings you want to fetch (1-100)
 
-6. Click "Fetch Data" to start scraping
+5. Click "Fetch Data" to start scraping
 
-7. Use "Continue Fetching" to get more results if available
+6. Use "Continue Fetching" to get more results if available
 
-8. Save your results using "Save as JSON" or load existing files with "Load File"
+7. Save your results using "Save as JSON" or load existing files with "Load File"
 
-9. Export to other formats like CSV & Excel using the File -> Export To... menu option
+8. Export to other formats like CSV & Excel using the File -> Export To... menu option
 
 
 
