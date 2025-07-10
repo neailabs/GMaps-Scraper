@@ -123,11 +123,11 @@ jobs:
       uses: softprops/action-gh-release@v2 # A popular action for creating GitHub Releases
       with:
         # Files to upload to the release. Paths are relative to the working directory.
-        # Ensure these paths match where actions/download-artifact put them.
+        # Fixed paths to match the actual directory structure created by download-artifact
         files: |
-          artifacts/GMaps-Scraper-Windows
-          artifacts/GMaps-Scraper-Linux
-          artifacts/GMaps-Scraper-MacOS-Silicon
+          artifacts/GMaps-Scraper-Windows/GMaps-Scraper.exe
+          artifacts/GMaps-Scraper-Linux/GMaps-Scraper
+          artifacts/GMaps-Scraper-MacOS-Silicon/*.app
 
         name: Release ${{ github.ref_name }} # Release name (e.g., "Release v1.0.0")
         tag_name: ${{ github.ref_name }} # The Git tag that triggered the workflow (e.g., "v1.0.0")
@@ -140,9 +140,9 @@ jobs:
           - **macOS** (Apple Silicon .app)
 
           ## How to Install/Run:
-          * **Windows**: Download `GMaps-Scraper-Windows.zip`, extract, and run `GMaps-Scraper.exe`.
-          * **Linux**: Download `GMaps-Scraper-Linux.zip`, extract, and run the `GMaps-Scraper` executable. You might need to make it executable: `chmod +x GMaps-Scraper`.
-          * **macOS (Apple Silicon)**: Download `GMaps-Scraper-MacOS-Silicon.zip`, extract, and drag `GMaps-Scraper.app` to your Applications folder.
+          * **Windows**: Download `GMaps-Scraper.exe` and run it directly.
+          * **Linux**: Download `GMaps-Scraper`, make it executable with `chmod +x GMaps-Scraper`, then run it.
+          * **macOS (Apple Silicon)**: Download the `.app` file and drag it to your Applications folder.
 
           ## Changes in this release:
           Fixed naming of artifacts
