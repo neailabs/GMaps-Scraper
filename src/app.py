@@ -9,14 +9,121 @@ from typing import List, Set, Optional
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
     QLabel, QLineEdit, QSpinBox, QCheckBox, QPushButton, QTableWidget,
-    QTableWidgetItem, QFileDialog, QHeaderView, QMessageBox
+    QTableWidgetItem, QFileDialog, QHeaderView, QMessageBox, QMenuBar,
+    QTextEdit, QDialog, QDialogButtonBox
 )
 from PySide6.QtCore import Qt, QUrl
-from PySide6.QtGui import QIcon, QDesktopServices
+from PySide6.QtGui import QIcon, QDesktopServices, QAction, QKeySequence
+from PySide6.QtWidgets import QAbstractItemView
 
 from src.models import BusinessRecord, AppConfig
 from src.worker import DataFetcherWorker
 from src.utils import FileHandler, UIHelper, validate_api_key, validate_search_query
+
+
+class AboutDialog(QDialog):
+    """About dialog for the application."""
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("About Google Maps Scraper")
+        self.setFixedSize(400, 300)
+        
+        layout = QVBoxLayout()
+        
+        # Application info
+        info_text = f"""
+        <h2>{AppConfig.WINDOW_TITLE}</h2>
+        <p><b>Version:</b> 1.0.5</p>
+        <p><b>Company:</b> {AppConfig.COMPANY_NAME}</p>
+        <p><b>Website:</b> <a href="{AppConfig.COMPANY_URL}">{AppConfig.COMPANY_URL}</a></p>
+        
+        <p>A powerful tool for scraping business listings from Google Maps using the Google Places API.</p>
+        
+        <p><b>Features:</b></p>
+        <ul>
+            <li>Search for businesses by query</li>
+            <li>Export data to JSON format</li>
+            <li>Load existing data files</li>
+            <li>Pagination support for large datasets</li>
+        </ul>
+        
+        <p><small>Built with PySide6 and Python</small></p>
+        """
+        
+        info_label = QLabel(info_text)
+        info_label.setWordWrap(True)
+        info_label.setOpenExternalLinks(True)
+        info_label.setAlignment(Qt.AlignmentFlag.AlignTop)
+        
+        layout.addWidget(info_label)
+        
+        # Buttons
+        button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok)
+        button_box.accepted.connect(self.accept)
+        layout.addWidget(button_box)
+        
+        self.setLayout(layout)
+
+
+class HelpDialog(QDialog):
+    """Help dialog for the application."""
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Help - Google Maps Scraper")
+        self.setFixedSize(600, 500)
+        
+        layout = QVBoxLayout()
+        
+        # Help content
+        help_text = """
+        <h2>Google Maps Scraper Help</h2>
+        
+        <h3>Getting Started</h3>
+        <p>1. <b>API Key:</b> Enter your Google Maps API key in the API Key field. You can get this from the Google Cloud Console.</p>
+        <p>2. <b>Search Query:</b> Enter your search query (e.g., "restaurants in New York", "hotels in Paris").</p>
+        <p>3. <b>Number of Listings:</b> Set how many listings you want to fetch (maximum 60 per request).</p>
+        <p>4. Click <b>Fetch Data</b> to start scraping.</p>
+        
+        <h3>Features</h3>
+        <p><b>Continue Fetching:</b> If there are more results available, use this to get additional pages of data.</p>
+        <p><b>Load Existing File:</b> Load previously saved data to avoid duplicates when continuing a search.</p>
+        <p><b>Save as JSON:</b> Export your scraped data to a JSON file for further processing.</p>
+        
+        <h3>File Formats Supported</h3>
+        <ul>
+            <li>JSON (.json) - Recommended for data exchange</li>
+            <li>CSV (.csv) - For spreadsheet applications</li>
+            <li>Excel (.xlsx, .xls) - For Microsoft Excel</li>
+        </ul>
+        
+        <h3>Tips</h3>
+        <ul>
+            <li>Use specific search queries for better results</li>
+            <li>Check "Continue Fetching" to automatically load more results</li>
+            <li>Save your data regularly to avoid losing progress</li>
+            <li>Use the existing file feature to resume interrupted searches</li>
+        </ul>
+        
+        <h3>Troubleshooting</h3>
+        <p><b>API Errors:</b> Make sure your API key is valid and has the Places API enabled.</p>
+        <p><b>No Results:</b> Try different search queries or check your internet connection.</p>
+        <p><b>Rate Limits:</b> Google API has rate limits. If you hit them, wait a moment before continuing.</p>
+        """
+        
+        help_content = QTextEdit()
+        help_content.setHtml(help_text)
+        help_content.setReadOnly(True)
+        
+        layout.addWidget(help_content)
+        
+        # Buttons
+        button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok)
+        button_box.accepted.connect(self.accept)
+        layout.addWidget(button_box)
+        
+        self.setLayout(layout)
 
 
 class GmapsCrawler(QMainWindow):
@@ -36,6 +143,7 @@ class GmapsCrawler(QMainWindow):
         
         # Setup UI
         self.setup_ui()
+        self.setup_menus()
         self.setup_connections()
         self.update_button_states()
         
@@ -73,6 +181,156 @@ class GmapsCrawler(QMainWindow):
         credits_layout = self.create_credits_footer()
         main_layout.addLayout(credits_layout)
         
+    def setup_menus(self):
+        """Setup the application menu bar."""
+        menubar = self.menuBar()
+        
+        # File Menu
+        file_menu = menubar.addMenu("&File")
+        
+        # New action
+        new_action = QAction("&New", self)
+        new_action.setShortcut(QKeySequence.StandardKey.New)
+        new_action.setStatusTip("Start a new search")
+        new_action.triggered.connect(self.new_search)
+        file_menu.addAction(new_action)
+        
+        # Open action
+        open_action = QAction("&Open...", self)
+        open_action.setShortcut(QKeySequence.StandardKey.Open)
+        open_action.setStatusTip("Open existing data file")
+        open_action.triggered.connect(self.load_existing_file)
+        file_menu.addAction(open_action)
+        
+        file_menu.addSeparator()
+        
+        # Save action
+        self.save_action = QAction("&Save", self)
+        self.save_action.setShortcut(QKeySequence.StandardKey.Save)
+        self.save_action.setStatusTip("Save current data")
+        self.save_action.triggered.connect(self.save_as_json)
+        self.save_action.setEnabled(False)
+        file_menu.addAction(self.save_action)
+        
+        # Save As action
+        self.save_as_action = QAction("Save &As...", self)
+        self.save_as_action.setShortcut(QKeySequence.StandardKey.SaveAs)
+        self.save_as_action.setStatusTip("Save current data with new name")
+        self.save_as_action.triggered.connect(self.save_as_json)
+        self.save_as_action.setEnabled(False)
+        file_menu.addAction(self.save_as_action)
+        
+        # Export submenu
+        export_menu = file_menu.addMenu("&Export")
+        
+        self.export_csv_action = QAction("Export as &CSV...", self)
+        self.export_csv_action.setStatusTip("Export data to CSV file")
+        self.export_csv_action.triggered.connect(self.export_as_csv)
+        self.export_csv_action.setEnabled(False)
+        export_menu.addAction(self.export_csv_action)
+        
+        self.export_excel_action = QAction("Export as &Excel...", self)
+        self.export_excel_action.setStatusTip("Export data to Excel file")
+        self.export_excel_action.triggered.connect(self.export_as_excel)
+        self.export_excel_action.setEnabled(False)
+        export_menu.addAction(self.export_excel_action)
+        
+        file_menu.addSeparator()
+        
+        # Exit action
+        exit_action = QAction("E&xit", self)
+        exit_action.setShortcut(QKeySequence.StandardKey.Quit)
+        exit_action.setStatusTip("Exit application")
+        exit_action.triggered.connect(self.close)
+        file_menu.addAction(exit_action)
+        
+        # Edit Menu
+        edit_menu = menubar.addMenu("&Edit")
+        
+        # Clear action
+        clear_action = QAction("&Clear Data", self)
+        clear_action.setShortcut(QKeySequence("Ctrl+L"))
+        clear_action.setStatusTip("Clear all fetched data")
+        clear_action.triggered.connect(self.clear_data)
+        edit_menu.addAction(clear_action)
+        
+        edit_menu.addSeparator()
+        
+        # Select All action
+        select_all_action = QAction("Select &All", self)
+        select_all_action.setShortcut(QKeySequence.StandardKey.SelectAll)
+        select_all_action.setStatusTip("Select all table rows")
+        select_all_action.triggered.connect(self.select_all_table)
+        edit_menu.addAction(select_all_action)
+        
+        # Copy action
+        copy_action = QAction("&Copy", self)
+        copy_action.setShortcut(QKeySequence.StandardKey.Copy)
+        copy_action.setStatusTip("Copy selected data to clipboard")
+        copy_action.triggered.connect(self.copy_selected_data)
+        edit_menu.addAction(copy_action)
+        
+        # View Menu
+        view_menu = menubar.addMenu("&View")
+        
+        # Refresh action
+        refresh_action = QAction("&Refresh", self)
+        refresh_action.setShortcut(QKeySequence.StandardKey.Refresh)
+        refresh_action.setStatusTip("Refresh the data table")
+        refresh_action.triggered.connect(self.refresh_table)
+        view_menu.addAction(refresh_action)
+        
+        view_menu.addSeparator()
+        
+        # Zoom actions
+        zoom_in_action = QAction("Zoom &In", self)
+        zoom_in_action.setShortcut(QKeySequence.StandardKey.ZoomIn)
+        zoom_in_action.setStatusTip("Increase font size")
+        zoom_in_action.triggered.connect(self.zoom_in)
+        view_menu.addAction(zoom_in_action)
+        
+        zoom_out_action = QAction("Zoom &Out", self)
+        zoom_out_action.setShortcut(QKeySequence.StandardKey.ZoomOut)
+        zoom_out_action.setStatusTip("Decrease font size")
+        zoom_out_action.triggered.connect(self.zoom_out)
+        view_menu.addAction(zoom_out_action)
+        
+        reset_zoom_action = QAction("&Reset Zoom", self)
+        reset_zoom_action.setShortcut(QKeySequence("Ctrl+0"))
+        reset_zoom_action.setStatusTip("Reset font size to default")
+        reset_zoom_action.triggered.connect(self.reset_zoom)
+        view_menu.addAction(reset_zoom_action)
+        
+        # Help Menu
+        help_menu = menubar.addMenu("&Help")
+        
+        # Help action
+        help_action = QAction("&Help", self)
+        help_action.setShortcut(QKeySequence.StandardKey.HelpContents)
+        help_action.setStatusTip("Show help documentation")
+        help_action.triggered.connect(self.show_help)
+        help_menu.addAction(help_action)
+        
+        # Visit Website action
+        website_action = QAction("Visit &Github &Page", self)
+        website_action.setStatusTip(f"Visit {AppConfig.COMPANY_NAME} website")
+        website_action.triggered.connect(self.visit_website)
+        help_menu.addAction(website_action)
+        
+        help_menu.addSeparator()
+        
+        # About action
+        about_action = QAction("&About", self)
+        about_action.setStatusTip("About this application")
+        about_action.triggered.connect(self.show_about)
+        help_menu.addAction(about_action)
+        
+        # About Qt action
+        about_qt_action = QAction("About &Qt", self)
+        about_qt_action.setStatusTip("About Qt framework")
+        about_qt_action.triggered.connect(self.show_about_qt)
+        help_menu.addAction(about_qt_action)
+    
     def create_input_panel(self) -> QWidget:
         """Create the input panel with form fields."""
         group_widget = QWidget()
@@ -245,6 +503,164 @@ class GmapsCrawler(QMainWindow):
         self.fetch_button.setEnabled(not self.is_fetching)
         self.continue_button.setEnabled(not self.is_fetching and has_pagination)
         self.save_json_button.setEnabled(has_data and not self.is_fetching)
+        
+        # Update menu actions
+        self.save_action.setEnabled(has_data and not self.is_fetching)
+        self.save_as_action.setEnabled(has_data and not self.is_fetching)
+        self.export_csv_action.setEnabled(has_data and not self.is_fetching)
+        self.export_excel_action.setEnabled(has_data and not self.is_fetching)
+    
+    # Menu Action Handlers
+    def new_search(self):
+        """Start a new search (clear all data)."""
+        if self.is_fetching:
+            UIHelper.show_warning_message(self, "Operation in Progress", 
+                                        "Please wait for the current operation to complete.")
+            return
+        
+        if self.fetched_data:
+            reply = QMessageBox.question(
+                self, "New Search", 
+                "This will clear all current data. Are you sure?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+            )
+            if reply != QMessageBox.StandardButton.Yes:
+                return
+        
+        self.clear_data()
+        self.api_key_input.clear()
+        self.search_query_input.clear()
+        self.num_listings_spinbox.setValue(AppConfig.DEFAULT_RECORD_COUNT)
+        self.continue_fetching_checkbox.setChecked(True)
+        self.file_path_label.setText("No file selected")
+        self.file_path_label.setStyleSheet("color: gray; font-style: italic;")
+        self.input_file_path = None
+    
+    def clear_data(self):
+        """Clear all fetched data."""
+        self.fetched_data.clear()
+        self.existing_links.clear()
+        self.next_page_token = None
+        self.table_widget.setRowCount(0)
+        self.fetched_count_label.setText("0")
+        self.update_button_states()
+    
+    def select_all_table(self):
+        """Select all rows in the table."""
+        self.table_widget.selectAll()
+    
+    def copy_selected_data(self):
+        """Copy selected table data to clipboard."""
+        selected_items = self.table_widget.selectedItems()
+        if not selected_items:
+            return
+        
+        # Get selected rows
+        selected_rows = set()
+        for item in selected_items:
+            selected_rows.add(item.row())
+        
+        # Build clipboard text
+        clipboard_text = []
+        headers = [self.table_widget.horizontalHeaderItem(i).text() 
+                  for i in range(self.table_widget.columnCount())]
+        clipboard_text.append("\t".join(headers))
+        
+        for row in sorted(selected_rows):
+            row_data = []
+            for col in range(self.table_widget.columnCount()):
+                item = self.table_widget.item(row, col)
+                row_data.append(item.text() if item else "")
+            clipboard_text.append("\t".join(row_data))
+        
+        # Copy to clipboard
+        from PySide6.QtGui import QGuiApplication
+        clipboard = QGuiApplication.clipboard()
+        clipboard.setText("\n".join(clipboard_text))
+        
+        UIHelper.show_info_message(self, "Copied", 
+                                 f"Copied {len(selected_rows)} rows to clipboard.")
+    
+    def refresh_table(self):
+        """Refresh the data table."""
+        if self.fetched_data:
+            self.table_widget.setRowCount(0)
+            self.update_table_with_records(self.fetched_data)
+    
+    def zoom_in(self):
+        """Increase font size."""
+        font = self.font()
+        font.setPointSize(font.pointSize() + 1)
+        self.setFont(font)
+    
+    def zoom_out(self):
+        """Decrease font size."""
+        font = self.font()
+        if font.pointSize() > 8:  # Minimum font size
+            font.setPointSize(font.pointSize() - 1)
+            self.setFont(font)
+    
+    def reset_zoom(self):
+        """Reset font size to default."""
+        font = self.font()
+        font.setPointSize(9)  # Default font size
+        self.setFont(font)
+    
+    def export_as_csv(self):
+        """Export data as CSV file."""
+        if not self.fetched_data:
+            UIHelper.show_warning_message(self, "No Data", "No data to export.")
+            return
+        
+        file_path, _ = QFileDialog.getSaveFileName(
+            self, "Export as CSV", "google_maps_listings.csv", "CSV Files (*.csv)"
+        )
+        
+        if file_path:
+            try:
+                FileHandler.save_to_csv(self.fetched_data, file_path)
+                UIHelper.show_info_message(self, "Success", 
+                                         f"Successfully exported {len(self.fetched_data)} records to CSV.")
+            except Exception as e:
+                UIHelper.show_error_message(self, "Export Error", 
+                                          f"Failed to export CSV: {str(e)}")
+    
+    def export_as_excel(self):
+        """Export data as Excel file."""
+        if not self.fetched_data:
+            UIHelper.show_warning_message(self, "No Data", "No data to export.")
+            return
+        
+        file_path, _ = QFileDialog.getSaveFileName(
+            self, "Export as Excel", "google_maps_listings.xlsx", "Excel Files (*.xlsx)"
+        )
+        
+        if file_path:
+            try:
+                FileHandler.save_to_excel(self.fetched_data, file_path)
+                UIHelper.show_info_message(self, "Success", 
+                                         f"Successfully exported {len(self.fetched_data)} records to Excel.")
+            except Exception as e:
+                UIHelper.show_error_message(self, "Export Error", 
+                                          f"Failed to export Excel: {str(e)}")
+    
+    def show_help(self):
+        """Show help dialog."""
+        help_dialog = HelpDialog(self)
+        help_dialog.exec()
+    
+    def visit_website(self):
+        """Visit Github Page."""
+        QDesktopServices.openUrl(QUrl(AppConfig.APPLICATION_URL))
+    
+    def show_about(self):
+        """Show about dialog."""
+        about_dialog = AboutDialog(self)
+        about_dialog.exec()
+    
+    def show_about_qt(self):
+        """Show about Qt dialog."""
+        QMessageBox.aboutQt(self, "About Qt")
     
     def start_fetching(self):
         """Start fetching data from Google Maps API."""

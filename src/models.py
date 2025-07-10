@@ -90,6 +90,9 @@ class AppConfig:
     COMPANY_NAME = "NE AI Innovation Labs"
     COMPANY_URL = "https://www.neailabs.com"
     
+    # Application info
+    APPLICATION_URL = "https://github.com/neailabs/GMaps-Scraper/"
+    
     # API settings
     PAGINATION_DELAY = 2.0  # seconds
     MAX_RECORDS_PER_REQUEST = 100

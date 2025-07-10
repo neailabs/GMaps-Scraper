@@ -22,13 +22,55 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt # Install dependencies from your requirements.txt
 
+    - name: Create version info file
+      run: |
+        # Extract version from git tag (remove 'v' prefix)
+        $version = "${{ github.ref_name }}" -replace '^v', ''
+        $versionParts = $version -split '\.'
+        $major = $versionParts[0]
+        $minor = $versionParts[1]
+        $patch = $versionParts[2]
+        
+        # Create version_info.txt with dynamic version
+        @"
+        # version_info.txt
+        # UTF-8
+        VSVersionInfo(
+          ffi=FixedFileInfo(
+            filevers=($major, $minor, $patch, 0),
+            prodvers=($major, $minor, $patch, 0),
+            mask=0x3f,
+            flags=0x0,
+            OS=0x4,
+            fileType=0x1,
+            subtype=0x0,
+            date=(0, 0)
+          ),
+          kids=[
+            StringFileInfo(
+              [
+              StringTable(
+                u'040904B0',
+                [StringStruct(u'CompanyName', u'NE AI Innovation Labs'),
+                StringStruct(u'FileDescription', u'GMaps Scraper - Google Maps Business Data Extractor'),
+                StringStruct(u'FileVersion', u'$version.0'),
+                StringStruct(u'InternalName', u'GMaps-Scraper'),
+                StringStruct(u'LegalCopyright', u'Copyright © 2025 NE AI Innovation Labs. All rights reserved.'),
+                StringStruct(u'OriginalFilename', u'GMaps-Scraper.exe'),
+                StringStruct(u'ProductName', u'GMaps Scraper'),
+                StringStruct(u'ProductVersion', u'$version.0'),
+                StringStruct(u'LegalTrademarks', u''),
+                StringStruct(u'Comments', u'Extract business information from Google Maps searches')])
+              ]), 
+            VarFileInfo([VarStruct(u'Translation', [1033, 1200])])
+          ]
+        )
+        "@ | Out-File -FilePath "version_info.txt" -Encoding UTF8
+
     - name: Build Windows Executable
       run: |
-        # Replace 'app.py' with your main application script name
-        # --noconsole prevents a console window from opening
-        # --onefile packages everything into a single .exe file
-        # --windowed is a PyInstaller option specific to GUI apps on Windows
-        pyinstaller --noconsole --onefile --windowed GMaps-Scraper.py
+        # Build with version info file
+        pyinstaller --noconsole --onefile --windowed --version-file=version_info.txt GMaps-Scraper.py
 
     - name: Upload Windows Artifact
       uses: actions/upload-artifact@v4
@@ -145,6 +187,6 @@ jobs:
           * **macOS (Apple Silicon)**: Download the `.app` file and drag it to your Applications folder.
 
           ## Changes in this release:
-          Fixed naming of artifacts
+          Added Windows executable metadata and fixed artifact upload paths
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Automatically provided by GitHub Actions for authentication
