@@ -786,13 +786,20 @@ class GmapsCrawler(QMainWindow):
             row = current_row_count + i
             self.table_widget.insertRow(row)
             
-            # Add data to columns
+            # Original columns
             self.table_widget.setItem(row, 0, QTableWidgetItem(record.name))
             self.table_widget.setItem(row, 1, QTableWidgetItem(record.address))
             self.table_widget.setItem(row, 2, QTableWidgetItem(record.phone))
             self.table_widget.setItem(row, 3, QTableWidgetItem(record.website))
             self.table_widget.setItem(row, 4, QTableWidgetItem(str(record.rating)))
-            self.table_widget.setItem(row, 5, QTableWidgetItem(record.gmaps_url))
+            self.table_widget.setItem(row, 5, QTableWidgetItem(str(record.rating_count)))
+            self.table_widget.setItem(row, 6, QTableWidgetItem(record.business_hours))
+            self.table_widget.setItem(row, 7, QTableWidgetItem(record.price_range))
+            self.table_widget.setItem(row, 8, QTableWidgetItem(str(record.photos_count)))
+            self.table_widget.setItem(row, 9, QTableWidgetItem(record.business_type))
+            self.table_widget.setItem(row, 10, QTableWidgetItem(", ".join(record.amenities)))
+            self.table_widget.setItem(row, 11, QTableWidgetItem(", ".join(record.delivery_options)))
+            self.table_widget.setItem(row, 12, QTableWidgetItem(record.gmaps_url))  # Google Map Link moved to end
     
     def load_existing_file(self):
         """Load existing data file."""
