@@ -13,6 +13,8 @@ A desktop GUI application built with PySide6 that fetches business listings from
 - **File Management**: Load existing data files and auto-append new results
 - **Export Options**: Save results in multiple formats
 
+![GMaps Scraper Main Window](https://raw.githubusercontent.com/neailabs/GMaps-Scraper/master/GMaps%20Scraper%20Main%20Window.png)
+
 ## Requirements
 
 - Python 3.8 or higher
