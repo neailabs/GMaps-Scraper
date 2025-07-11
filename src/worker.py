@@ -168,9 +168,17 @@ class DataFetcherWorker(QThread):
         """
         try:
             # Define fields to retrieve from Places API
+            # Include all fields needed for the extended BusinessRecord model
             fields = [
                 'name', 'formatted_address', 'formatted_phone_number',
-                'website', 'rating', 'place_id'
+                'website', 'rating', 'place_id', 'user_ratings_total',
+                'opening_hours', 'price_level', 'photo', 'type',
+                'business_status', 'geometry', 'icon', 'plus_code',
+                'vicinity', 'permanently_closed', 'url', 'delivery',
+                'takeout', 'dine_in', 'serves_beer', 'serves_wine',
+                'serves_breakfast', 'serves_lunch', 'serves_dinner',
+                'serves_brunch', 'serves_vegetarian_food', 'reservable',
+                'wheelchair_accessible_entrance', 'curbside_pickup'
             ]
             
             # Make actual API call to get place details
