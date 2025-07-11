@@ -24,7 +24,8 @@ def main():
     
     # Set application properties
     app.setApplicationName(AppConfig.WINDOW_TITLE)
-    app.setApplicationVersion("1.0.0")
+    app.setApplicationDisplayName(AppConfig.MENU_DISPLAY_NAME)
+    app.setApplicationVersion(AppConfig.VERSION)
     app.setOrganizationName(AppConfig.COMPANY_NAME)
     
     # Set application icon if available
