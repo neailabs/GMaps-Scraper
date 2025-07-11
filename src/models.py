@@ -253,10 +253,7 @@ class BusinessRecord:
     
 class AppConfig:
     """Application configuration constants."""
-    
-    # Application version
-    VERSION = "1.0.0"
-    
+        
     # Window settings
     WINDOW_TITLE = "Get Listings from Google Maps"
     ICON_PATH = "./res/company_icon.ico"

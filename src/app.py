@@ -34,7 +34,6 @@ class AboutDialog(QDialog):
         # Application info
         info_text = f"""
         <h2>{AppConfig.WINDOW_TITLE}</h2>
-        <p><b>Version:</b> {AppConfig.VERSION}</p>
         <p><b>Company:</b> {AppConfig.COMPANY_NAME}</p>
         <p><b>Website:</b> <a href="{AppConfig.COMPANY_URL}">{AppConfig.COMPANY_URL}</a></p>
         
