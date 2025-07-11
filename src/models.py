@@ -152,7 +152,7 @@ class BusinessRecord:
         amenities = []
         
         # Check for common amenities in types (fallback)
-        types = place_details.get('type', [])  # Note: API returns 'type' not 'types'
+        types = place_details.get('type', [])  # Note: API returns 'type' as array
         
         # Check for individual amenity fields from the API
         amenity_fields = {
@@ -208,7 +208,7 @@ class BusinessRecord:
             options.append('Curbside Pickup')
         
         # Fallback: check types for basic delivery options
-        types = place_details.get('type', [])  # Note: API returns 'type' not 'types'
+        types = place_details.get('type', [])  # Note: API returns 'type' as array
         
         if 'meal_delivery' in types and 'Delivery' not in options:
             options.append('Delivery')
@@ -222,7 +222,7 @@ class BusinessRecord:
     @staticmethod
     def _extract_business_type(place_details: Dict[str, Any]) -> str:
         """Extract business type from place details."""
-        types = place_details.get('type', [])  # Note: API returns 'type' not 'types'
+        types = place_details.get('type', [])  # Note: API returns 'type' as array
         
         # Priority mapping for business types
         type_mapping = {

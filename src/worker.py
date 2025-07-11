@@ -168,7 +168,7 @@ class DataFetcherWorker(QThread):
         """
         try:
             # Define fields to retrieve from Places API
-            # Include all fields needed for the extended BusinessRecord model
+            # Use only valid field names as per Google Places API documentation
             fields = [
                 'name', 'formatted_address', 'formatted_phone_number',
                 'website', 'rating', 'place_id', 'user_ratings_total',
