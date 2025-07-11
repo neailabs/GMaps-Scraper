@@ -94,7 +94,6 @@ class AppConfig:
     MENU_DISPLAY_NAME = "Gmaps Scraper"
     MENU_DESCRIPTION = "A simple app to scrape Google Maps listings."
     MENU_ICON = "./res/app_icon.ico"
-    VERSION = "1.0.6"
     APPLICATION_URL = "https://github.com/neailabs/GMaps-Scraper/"
     
     # API settings

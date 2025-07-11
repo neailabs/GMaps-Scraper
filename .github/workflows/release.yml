@@ -101,8 +101,10 @@ jobs:
 
     - name: Build Linux Executable
       run: |
-        # Replace 'app.py'
-        pyinstaller --noconsole --onefile GMaps-Scraper.py
+        # insert version info file creation
+        export APP_VERSION="${{ github.ref_name }}"
+        export APP_VERSION=${APP_VERSION#v}
+        pyinstaller --noconsole --onefile --name="GMaps Scraper" GMaps-Scraper.py
 
     - name: Upload Linux Artifact
       uses: actions/upload-artifact@v4
@@ -135,6 +137,8 @@ jobs:
     - name: Build macOS Application (Apple Silicon)
       run: |
         # PyInstaller creates a .app bundle within the dist directory
+        export APP_VERSION="${{ github.ref_name }}"
+        export APP_VERSION=${APP_VERSION#v}
         pyinstaller --noconsole --onefile --windowed --name "GMaps Scraper" GMaps-Scraper.py
 
     - name: Upload macOS Artifact
