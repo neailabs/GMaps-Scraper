@@ -139,7 +139,7 @@ jobs:
         # PyInstaller creates a .app bundle within the dist directory
         export APP_VERSION="${{ github.ref_name }}"
         export APP_VERSION=${APP_VERSION#v}
-        pyinstaller --noconsole --onefile --windowed --name "GMaps Scraper" GMaps-Scraper.py
+        pyinstaller --noconsole --onefile --windowed --name "GMaps-Scraper" GMaps-Scraper.py
 
     - name: Upload macOS Artifact
       uses: actions/upload-artifact@v4
