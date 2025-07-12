@@ -104,7 +104,7 @@ jobs:
         # insert version info file creation
         export APP_VERSION="${{ github.ref_name }}"
         export APP_VERSION=${APP_VERSION#v}
-        pyinstaller --noconsole --onefile --name="GMaps Scraper" GMaps-Scraper.py
+        pyinstaller --noconsole --onefile GMaps-Scraper.py
 
     - name: Upload Linux Artifact
       uses: actions/upload-artifact@v4
